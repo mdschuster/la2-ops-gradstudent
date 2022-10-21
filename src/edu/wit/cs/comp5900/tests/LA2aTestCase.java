@@ -1,0 +1,104 @@
+package edu.wit.cs.comp5900.tests;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import edu.wit.cs.comp5900.LA2a;
+import junit.framework.TestCase;
+
+public class LA2aTestCase extends TestCase {
+	
+	@SuppressWarnings("serial")
+	private static class ExitException extends SecurityException {}
+	
+
+	@Override
+    protected void setUp() throws Exception 
+    {
+        super.setUp();
+    }
+	
+	@Override
+    protected void tearDown() throws Exception 
+    {
+        super.tearDown();
+    }
+	
+	private final static String E_OP = "Invalid operation!";
+	
+	private void _test(String[] values, String result) {
+		final String input = String.join(" ", values);
+		
+		final String output = TestSuite.stringOutput(new String[] {
+			"Enter three numbers: ",
+			"Enter operation: ",
+			"%s%n" }, new Object[] {result});
+		
+		final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+		
+		System.setIn(new ByteArrayInputStream(input.getBytes()));
+		System.setOut(new PrintStream(outContent));
+		try {
+			LA2a.main(new String[] { "foo" });
+		} catch (ExitException e) {}
+		assertEquals(output, outContent.toString());
+		
+		System.setIn(null);
+		System.setOut(null);
+	}
+	
+	public void testOp() {
+		_test(new String[] {"-1", "0", "1", "avg"}, E_OP);
+		_test(new String[] {"-1", "0", "1", "sum"}, E_OP);
+		
+		_test(new String[] {"-1", "0", "1", "L1"}, E_OP);
+		_test(new String[] {"-1", "0", "1", "L2"}, E_OP);
+		_test(new String[] {"-1", "0", "1", "MIN"}, E_OP);
+		_test(new String[] {"-1", "0", "1", "Min"}, E_OP);
+	}
+	
+	private void _testResult(String[] values, String op, String a, String b, String c, String ans) {
+		_test(values, op + "(" + a + ", " + b + ", " + c + ") = " + ans);
+	}
+	
+	public void testMin() {
+		_testResult(new String[] {"-1", "0", "1", "min"}, "min", "-1.00", "0.00", "1.00", "-1.00");
+		_testResult(new String[] {"0", "-1", "1", "min"}, "min", "0.00", "-1.00", "1.00", "-1.00");
+		_testResult(new String[] {"1", "0", "-1", "min"}, "min", "1.00", "0.00", "-1.00", "-1.00");
+		
+		_testResult(new String[] {"-1", "-1", "-1", "min"}, "min", "-1.00", "-1.00", "-1.00", "-1.00");
+		_testResult(new String[] {"0", "0", "0", "min"}, "min", "0.00", "0.00", "0.00", "0.00");
+		_testResult(new String[] {"1", "1", "1", "min"}, "min", "1.00", "1.00", "1.00", "1.00");
+		
+		_testResult(new String[] {"3.14159", "2.718", "6.022", "min"}, "min", "3.14", "2.72", "6.02", "2.72");
+		_testResult(new String[] {"-3.14159", "2.718", "6.022", "min"}, "min", "-3.14", "2.72", "6.02", "-3.14");
+		_testResult(new String[] {"3.14159", "-2.718", "6.022", "min"}, "min", "3.14", "-2.72", "6.02", "-2.72");
+		_testResult(new String[] {"3.14159", "2.718", "-6.022", "min"}, "min", "3.14", "2.72", "-6.02", "-6.02");
+	}
+	
+	public void testL1() {
+		_testResult(new String[] {"1", "0", "-1", "l1"}, "l1", "1.00", "0.00", "-1.00", "2.00");
+		_testResult(new String[] {"-1", "0", "1", "l1"}, "l1", "-1.00", "0.00", "1.00", "2.00");
+		_testResult(new String[] {"1", "0", "1", "l1"}, "l1", "1.00", "0.00", "1.00", "2.00");
+		_testResult(new String[] {"-1", "0", "-1", "l1"}, "l1", "-1.00", "0.00", "-1.00", "2.00");
+		
+		_testResult(new String[] {"3.14159", "2.718", "6.022", "l1"}, "l1", "3.14", "2.72", "6.02", "11.88");
+		_testResult(new String[] {"-3.14159", "2.718", "6.022", "l1"}, "l1", "-3.14", "2.72", "6.02", "11.88");
+		_testResult(new String[] {"3.14159", "-2.718", "6.022", "l1"}, "l1", "3.14", "-2.72", "6.02", "11.88");
+		_testResult(new String[] {"3.14159", "2.718", "-6.022", "l1"}, "l1", "3.14", "2.72", "-6.02", "11.88");
+	}
+	
+	public void testL2() {
+		_testResult(new String[] {"1", "0", "-1", "l2"}, "l2", "1.00", "0.00", "-1.00", "1.41");
+		_testResult(new String[] {"-1", "0", "1", "l2"}, "l2", "-1.00", "0.00", "1.00", "1.41");
+		_testResult(new String[] {"1", "0", "1", "l2"}, "l2", "1.00", "0.00", "1.00", "1.41");
+		_testResult(new String[] {"-1", "0", "-1", "l2"}, "l2", "-1.00", "0.00", "-1.00", "1.41");
+		
+		_testResult(new String[] {"3.14159", "2.718", "6.022", "l2"}, "l2", "3.14", "2.72", "6.02", "7.32");
+		_testResult(new String[] {"-3.14159", "2.718", "6.022", "l2"}, "l2", "-3.14", "2.72", "6.02", "7.32");
+		_testResult(new String[] {"3.14159", "-2.718", "6.022", "l2"}, "l2", "3.14", "-2.72", "6.02", "7.32");
+		_testResult(new String[] {"3.14159", "2.718", "-6.022", "l2"}, "l2", "3.14", "2.72", "-6.02", "7.32");
+	}
+	
+}
